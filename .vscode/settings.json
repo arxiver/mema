@@ -1,0 +1,13 @@
+{
+ "files.associations": {
+  "stdio.h": "c",
+  "stdlib.h": "c",
+  "args.h": "c",
+  "setjmp.h": "c",
+  "cmocka.h": "c",
+  "stddef.h": "c",
+  "iostream": "cpp",
+  "mema.h": "c",
+  "pool.h": "c"
+ }
+}
