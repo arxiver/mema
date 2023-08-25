@@ -20,12 +20,14 @@ typedef struct Block
 ```c
 typedef struct Pool
 {
-  size_t poolSize;    // BYTES: unsigned int contains the size of the pool
-  size_t freeSize;    // BYTES: current pool free size
-  bool initialized;   // pool is initialized, true if initialized
-  void *mem;          // pointer to the first byte of the pool
-  struct Block *head; // head of the list of the allocated blocks
-  struct Block *tail; // tail of the list of the allocated blocks
+  size_t allocatedCount;   // number of allocated blocks
+  size_t deallocatedCount; // number of deallocated blocks
+  size_t poolSize;         // BYTES: unsigned int contains the size of the pool
+  size_t freeSize;         // BYTES: current pool free size
+  bool initialized;        // pool is initialized, true if initialized
+  void *mem;               // pointer to the first byte of the pool
+  struct Block *head;      // head of the list of the allocated blocks
+  struct Block *tail;      // tail of the list of the allocated blocks
 } Pool;
 ```
 
@@ -66,6 +68,21 @@ bool freePool(Pool *pool);
   - Free the mem of the pool from the memory
   - Free the pool
 
+### Behind the scenes
+Why did I decide that approach? I have kept on my mind the problem of memory management and the fragmentation of memory, that for example in case of I got the following order of allocation and deallocation:
+POOL SIZE = 10
+- a = allocate (2)
+- b = allocate (4)
+- c = allocate (1)
+- dellocate(a)
+
+At that point I will need to do one of the following:
+
+
+- Make a layer of memory management/access so that I handle the decontinuous allocation and deallocation. It is a bit complex, considering the above example, if I tried to allocate 5 bytes I will not be able to handle it because the free size is 6 (2 at the first bytes) and 4 at the last bytes, connectin them together and returing them is not possible to be done in a simple way.
+
+- Second one is keep tracking of the memory allocated through a linked list that is managed by a manager (the pool) and keep the area of the pool allocated and once there is a chunk of data requested freeing that from the pool and let it be taken from the memory and I make a block on my side that points to it and connect it to the pool chain was what I decided to do after a long time of thinking and actually due to the tightness of the time I decided to do it this way the make the control of the memory allocation and deallocation easier and co-managed by the memory.
+
 ### Build
 ```sh
 make clean
@@ -79,6 +96,3 @@ make test
 
 ### Author
 Mohamed Mokhtar [@rrrokhtar](https://github.com/rrrokhtar)
-
-
-  

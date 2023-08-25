@@ -1,8 +1,18 @@
 
 #include "pool.h"
 
-bool initPool(struct Pool *pool, size_t poolSize)
+// Initialization
+
+/// @brief Sets up the pool
+/// @param pool The pool instance to initialize
+/// @param poolSize The size of the pool
+/// @return bool indicating success
+bool initPool(Pool *pool, size_t poolSize)
 {
+  if (pool->initialized)
+    return false;
+  pool->allocatedCount = 0;
+  pool->deallocatedCount = 0;
   pool->freeSize = poolSize;
   pool->poolSize = poolSize;
   pool->mem = malloc(poolSize);
@@ -14,12 +24,17 @@ bool initPool(struct Pool *pool, size_t poolSize)
   return true;
 }
 
-bool freePool(struct Pool *pool)
+// Free/Destruction
+
+/// @brief Frees the pool
+/// @param pool The pool instance to free
+/// @return bool indicating success
+bool freePool(Pool *pool)
 {
   if (!pool->initialized)
     return false;
   // free blocks allocated
-  struct Block *b = pool->head;
+  Block *b = pool->head;
   while (b != NULL)
   {
     pool->head = b->next;
@@ -31,70 +46,30 @@ bool freePool(struct Pool *pool)
   }
   if (pool->freeSize != 0)
     free(pool->mem);
+  pool->poolSize = 0;
+  pool->freeSize = 0;
+  pool->mem = NULL;
+  pool->head = NULL;
+  pool->tail = NULL;
+  pool->allocatedCount = 0;
+  pool->deallocatedCount = 0;
+  pool->initialized = false;
   return true;
 }
 
-bool pfree(struct Pool *pool, void *ptr)
+/// @brief Allocates a chunk
+/// @param pool The pool instance to allocate from
+/// @param size The size of the chunk
+/// @return void pointer to the chunk
+void *palloc(Pool *pool, size_t size)
 {
-  // If pool is not initialized, return false
-  if (!pool->initialized)
-    return false;
-  // Find the block that contains the provided pointer
-  struct Block *b = pool->head;
-  while (b != NULL)
-    if (b->ptr == ptr)
-      break;
-  // If not found, return false
-  if (b == NULL)
-    return false;
-
-  // if the block is the head, update the head
-  if (pool->head == b)
-    pool->head = b->next;
-
-  // if the block is the tail, update the tail
-  if (pool->tail == b)
-    pool->tail = b->prev;
-
-  // Disconnect the block from the list
-  if (b->prev != NULL)
-    b->prev->next = b->next;
-
-  // Regain memory to the pool
-  // - from the chunk
-  pool->freeSize += b->size;
-  // - from the block
-  if (b->poolAllocated)
-  {
-    pool->freeSize += sizeof(struct Block);
-  }
-  // to the pool
-  void *ret = realloc(pool->mem, pool->freeSize);
-  if (ret == NULL)
-  {
-    merror("block allocation failed");
-    return false;
-  }
-  else
-  {
-    pool->mem = ret;
-  }
-
-  free(ptr);
-  free(b);
-  b = NULL;
-  ptr = NULL;
-  return true;
-}
-
-void *palloc(struct Pool *pool, size_t size)
-{
-  void *ret;
   if (!pool->initialized)
   {
     merror("pool not initialized");
     return NULL;
   }
+
+  void *ret;
   if (size > pool->freeSize)
   {
     merror("no memory available");
@@ -192,5 +167,86 @@ void *palloc(struct Pool *pool, size_t size)
     merror("chunk allocation failed (2) while allocating chunk in the mem");
     return NULL;
   }
+  pool->allocatedCount += 1;
   return b->ptr;
+}
+
+// Memory/Chunk deallocation
+
+/// @brief Frees a chunk
+/// @param pool The pool instance to free
+/// @param ptr The pointer to the chunk
+/// @return bool indicating success
+bool pfree(Pool *pool, void *ptr)
+{
+  // If pool is not initialized, return false
+  if (!pool->initialized)
+  {
+    return false;
+  }
+
+  // Find the block that contains the provided pointer
+  Block *b = pool->head;
+  while (b != NULL)
+  {
+    if (b->ptr == ptr)
+      break;
+    b = b->next;
+  }
+
+  // If not found, return false
+  if (b == NULL)
+  {
+    return false;
+  }
+
+  // if the block is the head, update the head
+  if (pool->head == b)
+  {
+    pool->head = b->next;
+  }
+  // Disconnect the block from the list
+  else if (b->prev != NULL)
+  {
+    b->prev->next = b->next;
+    if (b->next != NULL)
+    {
+      b->next->prev = b->prev;
+    }
+  }
+
+  // if the block is the tail, update the tail
+  if (pool->tail == b)
+  {
+    pool->tail = b->prev;
+  }
+
+  // Regain memory to the pool
+  // - from the chunk
+  pool->freeSize += b->size;
+  // - from the block
+  if (b->poolAllocated)
+  {
+    pool->freeSize += sizeof(struct Block);
+  }
+
+  // to the pool
+  void *ret = realloc(pool->mem, pool->freeSize);
+  if (ret == NULL)
+  {
+    merror("block allocation failed");
+    return false;
+  }
+  else
+  {
+    pool->mem = ret;
+  }
+
+  // Free the state
+  free(ptr);
+  free(b);
+  b = NULL;
+  ptr = NULL;
+  pool->deallocatedCount += 1;
+  return true;
 }

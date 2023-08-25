@@ -7,14 +7,18 @@
 #include <stddef.h>
 #include <errno.h>
 
+// Utils macros for testing
+#define MB(m) 1024 * 1024 * m
+#define KB(m) 1024 * m
+
 // Error handling
 #define merror(e) printf("pmem: " e "\n")
 
 // Stats macro for dynamic memory allocation
-#define ppstats(p) printf("Pool size: %lu, free size: %lu, init: %u\n", p->poolSize, p->freeSize, p->initialized)
+#define ppstats(p) printf("Pool size: %lu, free size: %lu, init: %u, #al: %lu, #de: %lu\n", p->poolSize, p->freeSize, p->initialized, p->allocatedCount, p->deallocatedCount)
 
 // Stats macro for static memory allocation
-#define pstats(p) printf("Pool size: %lu, free size: %lu, init: %u\n", p.poolSize, p.freeSize, p.initialized)
+#define pstats(p) printf("Pool: %lu B,\tfree: %lu B\tinit: %u\t#al: %lu \t#de: %lu\n", p.poolSize, p.freeSize, p.initialized, p.allocatedCount, p.deallocatedCount)
 
 typedef struct Block
 {
@@ -27,17 +31,26 @@ typedef struct Block
 
 typedef struct Pool
 {
-  size_t poolSize;    // BYTES: unsigned int contains the size of the pool
-  size_t freeSize;    // BYTES: current pool free size
-  bool initialized;   // pool is initialized, true if initialized
-  void *mem;          // pointer to the first byte of the pool
-  struct Block *head; // head of the list of the allocated blocks
-  struct Block *tail; // tail of the list of the allocated blocks
+  size_t allocatedCount;   // number of allocated blocks
+  size_t deallocatedCount; // number of deallocated blocks
+  size_t poolSize;         // BYTES: unsigned int contains the size of the pool
+  size_t freeSize;         // BYTES: current pool free size
+  bool initialized;        // pool is initialized, true if initialized
+  void *mem;               // pointer to the first byte of the pool
+  struct Block *head;      // head of the list of the allocated blocks
+  struct Block *tail;      // tail of the list of the allocated blocks
 } Pool;
 
-bool initPool(struct Pool *pool, size_t poolSize);
-bool freePool(struct Pool *pool);
-void *palloc(struct Pool *pool, size_t size);
-bool pfree(struct Pool *pool, void *ptr);
+// Initialization
+bool initPool(Pool *pool, size_t poolSize);
+
+// Free/Destruction
+bool freePool(Pool *pool);
+
+// Memory allocation
+void *palloc(Pool *pool, size_t size);
+
+// Memory deallocation
+bool pfree(Pool *pool, void *ptr);
 
 #endif // MEMA_H

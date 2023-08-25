@@ -1,13 +1,12 @@
 #include <pool.h>
 #include <time.h> // for clock_t, clock(), CLOCKS_PER_SEC
 
-// Pool Size: 2 MB Block size per memory allocation request: 5 KB
 void main()
 {
- //   // clock vars
+ printf("\n------------- TEST 03 START -----------------\n");
+ // clock vars
  double time_spent = 0.0;
  clock_t begin, end;
-
  // Creating the pool
  struct Pool pool;
  bool ok;
@@ -85,4 +84,5 @@ void main()
  {
   merror("freePool failed");
  }
+ printf("\n------------- TEST 03 END -----------------\n");
 }
