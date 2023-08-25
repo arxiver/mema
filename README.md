@@ -1,5 +1,5 @@
 # mema (MEmory MAnager)
-Memory Manager for C language to maintain the memory allocation and dellactions and works as a memory pool
+(Bitnie Memory Manager) Memory Manager for C language to maintain the memory allocation and dellactions and works as a memory pool
 
 ### Building blocks
 
@@ -85,7 +85,10 @@ At that point I will need to do one of the following:
 
 ### Build
 ```sh
-make clean
+make 
+```
+### Run
+```sh
 make run
 ```
 
@@ -94,5 +97,13 @@ make run
 make test
 ```
 
+### Output
+Check a snippet from are in OUTPUT.md
+
+### Requirements
+- C
+- gcc 
+- make
+
 ### Author
-Mohamed Mokhtar [@rrrokhtar](https://github.com/rrrokhtar)
+Made for Bitnie by Mohamed Mokhtar [@rrrokhtar](https://github.com/rrrokhtar)
