@@ -79,7 +79,7 @@ POOL SIZE = 10
 At that point I will need to do one of the following:
 
 
-- Make a layer of memory management/access so that I handle the decontinuous allocation and deallocation. It is a bit complex, considering the above example, if I tried to allocate 5 bytes I will not be able to handle it because the free size is 6 (2 at the first bytes) and 4 at the last bytes, connectin them together and returing them is not possible to be done in a simple way.
+- Make a layer of memory management/access so that I handle the decontinuous allocation and deallocation. It is a bit complex, considering the above example, if I tried to allocate 5 bytes I will not be able to handle it because the free size is 6 (2 at the first bytes) and 4 at the last bytes, connecting them together and returing them is not possible to be done in a simple way.
 
 - Second one is keep tracking of the memory allocated through a linked list that is managed by a manager (the pool) and keep the area of the pool allocated and once there is a chunk of data requested freeing that from the pool and let it be taken from the memory and I make a block on my side that points to it and connect it to the pool chain was what I decided to do after a long time of thinking and actually due to the tightness of the time I decided to do it this way the make the control of the memory allocation and deallocation easier and co-managed by the memory.
 
@@ -106,4 +106,4 @@ Check a snippet from are in OUTPUT.md
 - make
 
 ### Author
-Made for Bitnie by Mohamed Mokhtar [@rrrokhtar](https://github.com/rrrokhtar)
+Made for Bitnine by Mohamed Mokhtar [@rrrokhtar](https://github.com/rrrokhtar)
