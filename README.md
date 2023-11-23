@@ -1,5 +1,5 @@
 # mema (MEmory MAnager)
-(Bitnie Memory Manager) Memory Manager for C language to maintain the memory allocation and dellactions and works as a memory pool
+(Bit9 Memory Manager) Memory Manager for C language to maintain the memory allocation and dellactions and works as a memory pool
 
 ### Building blocks
 
